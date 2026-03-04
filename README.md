@@ -27,12 +27,12 @@ Clone the repository into the skills directory of your AI agent.
 
 **Claude Code:**
 ```bash
-git clone git@github.com:juanje/context-generator.git ~/.claude/skills/context-generator
+git clone https://github.com/juanje/context-generator.git ~/.claude/skills/context-generator
 ```
 
 **Cursor:**
 ```bash
-git clone git@github.com:juanje/context-generator.git ~/.cursor/skills-cursor/context-generator
+git clone https://github.com/juanje/context-generator.git ~/.cursor/skills/context-generator
 ```
 
 Then restart your agent. The skill will be available automatically.
