@@ -1,5 +1,6 @@
 ---
 name: context-generator
+version: 1.0.0
 description: >
   Use this skill to generate or update project context files (.ai_review/project.md) that help
   AI code reviewers understand a codebase. Invoke it when users want to: fix AI review quality
@@ -194,6 +195,9 @@ Create the `.ai_review/` directory if it doesn't exist. The user can specify any
 Seed manual sections with whatever you can infer. Don't leave them empty when you
 have evidence from git history or code patterns.
 
+**Footer:** End the file with the generated-by footer (see `references/output-format.md`).
+Use the version from this skill's frontmatter, and include the host tool and model.
+
 ---
 
 ## Generate Mode — Team Scope
@@ -230,6 +234,9 @@ Read `references/output-format.md` for the team scope format specification.
 
 **Size target:** under 200 lines. Team files are loaded alongside project files — both
 share the context window.
+
+**Footer:** End the file with the generated-by footer (see `references/output-format.md`).
+Include the host tool and model.
 
 ### How Team + Project Files Complement Each Other
 
@@ -280,6 +287,7 @@ Report what looks stale and suggest updates. Don't silently overwrite.
 2. Re-explore the project (same as generate mode phases)
 3. Regenerate all auto-generated sections
 4. Preserve everything below `<!-- MANUAL SECTIONS - DO NOT MODIFY THIS LINE -->`
+5. Update the generated-by footer with the current version, tool, and model
 
 ### Preservation Rules
 
