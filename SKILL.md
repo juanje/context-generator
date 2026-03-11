@@ -194,6 +194,9 @@ Create the `.ai_review/` directory if it doesn't exist. The user can specify any
 Seed manual sections with whatever you can infer. Don't leave them empty when you
 have evidence from git history or code patterns.
 
+**README:** Write `.ai_review/README.md` (see `references/output-format.md`).
+Include the skill version, host tool, and model.
+
 ---
 
 ## Generate Mode — Team Scope
@@ -280,6 +283,7 @@ Report what looks stale and suggest updates. Don't silently overwrite.
 2. Re-explore the project (same as generate mode phases)
 3. Regenerate all auto-generated sections
 4. Preserve everything below `<!-- MANUAL SECTIONS - DO NOT MODIFY THIS LINE -->`
+5. Regenerate `.ai_review/README.md` with the current version, tool, and model, if in project scope
 
 ### Preservation Rules
 
