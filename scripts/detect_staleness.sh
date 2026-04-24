@@ -8,6 +8,37 @@
 
 set -euo pipefail
 
+# Show help if requested
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    cat <<EOF
+Usage: detect_staleness.sh [PROJECT_ROOT] [CONTEXT_FILE]
+
+Compare existing context file against current project state.
+
+Arguments:
+  PROJECT_ROOT    Directory to analyze (default: current directory)
+  CONTEXT_FILE    Context file to check (default: .ai_review/project.md)
+
+Output:
+  Report identifying potentially stale sections of the context file
+  based on dependency changes, file references, and git history.
+
+Examples:
+  detect_staleness.sh
+  detect_staleness.sh /path/to/project
+  detect_staleness.sh . custom-context.md
+EOF
+    exit 0
+fi
+
+# Check for required commands
+for cmd in git grep sort stat; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "Error: Required command '$cmd' not found" >&2
+        exit 1
+    fi
+done
+
 PROJECT_ROOT="${1:-.}"
 CONTEXT_FILE="${2:-${PROJECT_ROOT}/.ai_review/project.md}"
 
@@ -52,18 +83,14 @@ check_dep_versions() {
     echo ""
     echo "--- $label ($dep_file) ---"
 
-    # Extract version-like patterns from the dependency file
-    local current_deps
-    current_deps=$(cat "$dep_file" 2>/dev/null)
-
     # Extract dependency names mentioned in the context file
     # Look for patterns like **depname** or `depname` followed by version-like strings
     local context_deps
-    context_deps=$(grep -oE '\*\*[a-zA-Z0-9_-]+[><=!~^]+[0-9][0-9.]*' "$CONTEXT_FILE" 2>/dev/null \
+    context_deps=$(grep -oE "\\*\\*[a-zA-Z0-9_-]+[><=!~^]+[0-9][0-9.]*" "$CONTEXT_FILE" 2>/dev/null \
         | sed 's/\*\*//g' || true)
 
     if [ -z "$context_deps" ]; then
-        context_deps=$(grep -oE '`[a-zA-Z0-9_-]+`.*[><=!~^]+[0-9][0-9.]*' "$CONTEXT_FILE" 2>/dev/null \
+        context_deps=$(grep -oE "\`[a-zA-Z0-9_-]+\`.*[><=!~^]+[0-9][0-9.]*" "$CONTEXT_FILE" 2>/dev/null \
             | sed 's/`//g' || true)
     fi
 
@@ -106,12 +133,9 @@ echo "── FILE REFERENCES CHECK ──"
 echo "Files/directories mentioned in context file that may have changed:"
 echo ""
 
-# Extract file paths from the context file (patterns like `src/foo/bar.py` or src/foo/)
-file_refs=$(grep -oE '`[a-zA-Z0-9_./-]+\.(py|js|ts|tsx|go|rs|rb|java|kt|swift|c|cpp|h|yml|yaml|toml|json|md)`' \
+# Extract file paths from the context file (patterns like `src/foo/bar.py`)
+file_refs=$(grep -oE "\`[a-zA-Z0-9_./-]+\\.(py|js|ts|tsx|go|rs|rb|java|kt|swift|c|cpp|h|yml|yaml|toml|json|md)\`" \
     "$CONTEXT_FILE" 2>/dev/null | sed 's/`//g' | sort -u || true)
-
-dir_refs=$(grep -oE '`?[a-zA-Z0-9_-]+/[a-zA-Z0-9_/-]*`?' "$CONTEXT_FILE" 2>/dev/null \
-    | sed 's/`//g' | grep -v '^http' | sort -u || true)
 
 missing_count=0
 if [ -n "$file_refs" ]; then
@@ -138,7 +162,10 @@ for dir in */; do
     dir_name="${dir%/}"
     # Skip hidden dirs and common non-interesting dirs
     case "$dir_name" in
-        .*|node_modules|__pycache__|.git|dist|build|target|vendor|venv|.venv|.tox|.mypy_cache|.ruff_cache|.pytest_cache|htmlcov|.eggs|*.egg-info)
+        node_modules|__pycache__|.git|dist|build|target|vendor|venv|.venv|.tox|.mypy_cache|.ruff_cache|.pytest_cache|htmlcov|.eggs|*.egg-info)
+            continue
+            ;;
+        .*)
             continue
             ;;
     esac
@@ -191,7 +218,7 @@ for f in Dockerfile Dockerfile.* docker-compose.yml docker-compose.yaml; do
         echo ""
 
         echo "--- Images mentioned in context file ---"
-        grep -i -E '(FROM|image:|base:|build:).*`[^`]+`' "$CONTEXT_FILE" 2>/dev/null || \
+        grep -i -E "(FROM|image:|base:|build:).*\`[^\`]+\`" "$CONTEXT_FILE" 2>/dev/null || \
             echo "  (no container images found in context file)"
         echo ""
     fi

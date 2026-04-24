@@ -1,16 +1,16 @@
 ---
 name: context-generator
 description: >
-  Use this skill to generate or update project context files (.ai_review/project.md) that help
-  AI code reviewers understand a codebase. Invoke it when users want to: fix AI review quality
-  (reviewers flagging internal libraries, suggesting outdated versions, missing architecture
-  context); create or refresh .ai_review/project.md or similar context files; build team-level
-  or org-wide coding standards for AI reviewers; set up context for ai-code-review, Cursor rules,
-  or any AI-assisted review system; or make LLM reviewers aware of project-specific patterns,
-  internal services, and current dependency versions. Also use when users mention stale review
-  context, project context generation, or want to help AI reviewers understand their codebase.
-  This skill explores the repo, extracts versions from dependency files, analyzes architecture,
-  and produces a concise context file — not a README, not a CLAUDE.md, not documentation.
+  Generate AI reviewer context files that prevent outdated dependency suggestions, 
+  internal library confusion, and architectural misunderstandings. Use when setting 
+  up AI code review (ai-code-review, Cursor, etc.), refreshing stale context, or 
+  creating team coding standards. Handles .ai_review/project.md generation and updates.
+license: MIT
+compatibility: Requires bash, git, Python 3.7+, and filesystem access
+metadata:
+  author: juanje
+  version: "1.0"
+  updated: "2026-04-24"
 ---
 
 # Context Generator
@@ -81,6 +81,11 @@ Run through the quality checklist:
 4. Under the size target for the project's complexity
 5. No over-explanation of well-known tools or libraries
 6. No duplication with CLAUDE.md or team context file (if applicable)
+
+Optionally run the validation script to check quality:
+```bash
+python3 scripts/validate_context.py .ai_review/project.md
+```
 
 ---
 
@@ -311,17 +316,7 @@ The output format is standard markdown — compatible with most AI context syste
 
 ## Edge Cases
 
-- **Small projects (<10 files)**: Skip detailed directory tree. Focus on deps and patterns.
-  Context file should be proportionally small.
-- **Monorepos**: Focus on the package/service the user is working in. Ask if ambiguous.
-  Note cross-package dependencies.
-- **No git repository**: Skip git history. Use filesystem listing. Note that design
-  decisions couldn't be inferred from history.
-- **Existing custom structure**: Preserve custom structure rather than forcing the template.
-  Update content within the existing organization.
-- **Non-code projects (IaC, config repos)**: Adapt sections to project type. Read
-  `references/adaptation-guide.md` for guidance.
-- **CLAUDE.md exists but no project.md**: Read CLAUDE.md, generate project.md as complement.
+For edge cases like small projects, monorepos, and non-code projects, see [references/edge-cases.md](references/edge-cases.md).
 
 ---
 
@@ -331,6 +326,8 @@ The output format is standard markdown — compatible with most AI context syste
 |----------|-------------|---------|
 | `scripts/extract_project_facts.sh` | Always first in generate mode | Fast project snapshot in one call |
 | `scripts/detect_staleness.sh` | Update mode, before making changes | Identifies what's stale |
+| `scripts/validate_context.py` | After writing output | Validates context file quality |
 | `references/output-format.md` | Before writing any output | Format spec, section templates, good vs bad examples |
 | `references/example-context.md` | First generation | Calibrate quality and conciseness |
 | `references/adaptation-guide.md` | After Phase 1, if non-standard project | Adapt approach for project type or AI tool |
+| `references/edge-cases.md` | When handling special scenarios | Guidance for edge cases and special situations |

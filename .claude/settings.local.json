@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(shellcheck *)",
+      "Bash(python3 *)",
+      "Bash(bash *)",
+      "Bash(git add *)"
+    ]
+  }
+}

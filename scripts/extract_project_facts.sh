@@ -8,6 +8,35 @@
 
 set -euo pipefail
 
+# Show help if requested
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    cat <<EOF
+Usage: extract_project_facts.sh [PROJECT_ROOT]
+
+Extracts structured project information for context file generation.
+
+Arguments:
+  PROJECT_ROOT    Directory to analyze (default: current directory)
+
+Output:
+  Structured facts about dependencies, git history, architecture,
+  and development workflow. Used by context-generator skill.
+
+Examples:
+  extract_project_facts.sh
+  extract_project_facts.sh /path/to/project
+EOF
+    exit 0
+fi
+
+# Check for required commands
+for cmd in git find grep sort; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "Error: Required command '$cmd' not found" >&2
+        exit 1
+    fi
+done
+
 PROJECT_ROOT="${1:-.}"
 cd "$PROJECT_ROOT"
 
@@ -20,7 +49,12 @@ echo ""
 
 # ── Root Files ──────────────────────────────────────────────
 echo "── ROOT FILES ──"
-ls -1a 2>/dev/null | grep -v '^\.\.$' | grep -v '^\.$' | head -40
+# Use a safer approach than ls | grep
+{
+    for file in .* *; do
+        [[ "$file" != "." && "$file" != ".." && -e "$file" ]] && echo "$file"
+    done 2>/dev/null || true
+} | head -40
 echo ""
 
 # ── Key File Presence ───────────────────────────────────────
@@ -157,7 +191,7 @@ fi
 # Check for GitHub Actions directory
 if [ -d ".github/workflows" ]; then
     echo "  GitHub Actions workflows:"
-    ls -1 .github/workflows/ 2>/dev/null | head -10
+    find .github/workflows -maxdepth 1 -type f \( -name "*.yml" -o -name "*.yaml" \) 2>/dev/null | sed 's|.*/||' | head -10
 fi
 echo ""
 
