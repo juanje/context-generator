@@ -7,7 +7,7 @@ description: >
   creating team coding standards. Handles .ai_review/project.md generation and updates.
 license: MIT
 compatibility: Requires bash, git, Python 3.7+, and filesystem access
-allowed-tools: Bash(bash */context-generator/scripts/*.sh) Bash(python3:*) Bash(git:*) Bash(find:*) Bash(grep:*) Read Write
+allowed-tools: Bash(bash */context-generator/scripts/*.sh) Bash(python3 */context-generator/scripts/validate_context.py *) Bash(git:*) Bash(find:*) Bash(grep:*) Read Write
 metadata:
   author: juanje
   version: "1.0"
