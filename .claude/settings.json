@@ -4,7 +4,8 @@
       "Bash(shellcheck *)",
       "Bash(python3 *)",
       "Bash(bash *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }
