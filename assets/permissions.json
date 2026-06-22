@@ -1,0 +1,31 @@
+{
+  "defaultMode": "deny",
+  "permissions": {
+    "tools": {
+      "read": { "default": "allow" },
+      "write": {
+        "default": "deny",
+        "paths": { "allow": [".ai_review/project.md", ".ai_review/README.md"] }
+      },
+      "edit": {
+        "default": "deny",
+        "paths": { "allow": [".ai_review/project.md", ".ai_review/README.md"] }
+      },
+      "bash": {
+        "default": "deny",
+        "allow": [
+          "bash */scripts/extract_project_facts.sh *",
+          "bash */scripts/detect_staleness.sh *",
+          "python3 */scripts/validate_context.py *",
+          "git show *", "git log *", "git rev-list *", "git diff *", "git ls-files *", "git status*",
+          "find *", "grep *", "ls *", "cat *", "wc *", "head *", "tail *",
+          "mkdir -p .ai_review"
+        ],
+        "deny": ["rm *", "git push *", "git commit *", "curl *", "wget *", "pip *", "npm *", "python3 -c *"]
+      },
+      "grep": "allow",
+      "find": "allow",
+      "ls": "allow"
+    }
+  }
+}
